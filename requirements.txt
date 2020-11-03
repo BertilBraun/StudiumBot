@@ -1,0 +1,7 @@
+discord
+python-dotenv
+schedule
+asyncio
+argparse
+pyyaml
+datetime

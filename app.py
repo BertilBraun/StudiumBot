@@ -8,6 +8,8 @@ import datetime
 from dotenv import load_dotenv
 from discord.ext import commands
 
+print("Starting..")
+
 load_dotenv() 
 TOKEN = os.getenv('DISCORD_TOKEN')
 

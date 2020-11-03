@@ -20,7 +20,7 @@ bot = commands.Bot(command_prefix='.', description='A Studium Bot to manage Stud
 
 messagesToSend = []
 
-async def showHelp(ctx, title, val):
+async def showHelpWrapper(ctx, title, val):
     embedVar = discord.Embed(color=0x00ff00)
     embedVar.add_field(
         name=title, 
@@ -67,7 +67,7 @@ async def addScheduleString(str, ctx = None) -> bool:
             example command:
             .add on Mo at 18:10 send "New Event upcoming! Join us in VC!"
             """
-        await showHelp(ctx, title, val)
+        await showHelpWrapper(ctx, title, val)
 
     str = str.replace('on', '-on').replace('at', '-at').replace('send', '-send')
 
@@ -210,7 +210,7 @@ class Studium(commands.Cog):
                 .rem 0
                 .rem on Mo at 18:10 send "New Event upcoming! Join us in VC!"
                 """
-            await showHelp(ctx, title, val)
+            await showHelpWrapper(ctx, title, val)
             return
         
         with open("schedule.yaml", 'r') as stream:

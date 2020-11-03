@@ -128,7 +128,8 @@ async def addScheduleString(str, ctx = None) -> bool:
             messagesToSend.append(str)
 
         event.do(job, args.send)
-        print("added:", args.send)
+        print("added:")
+        print(args)
 
         return True
 

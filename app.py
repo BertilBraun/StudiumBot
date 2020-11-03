@@ -128,6 +128,7 @@ async def addScheduleString(str, ctx = None) -> bool:
             messagesToSend.append(str)
 
         event.do(job, args.send)
+        print("added:", args.send)
 
         return True
 
@@ -157,6 +158,7 @@ class Studium(commands.Cog):
 
     @commands.command(name='add', help='This Command adds a message to be displayed at a specific time!')
     async def addToSchedule(self, ctx, *, arg):
+        print("add")
         # Add to Schedule
         added = await addScheduleString(arg, ctx)
 
@@ -166,9 +168,13 @@ class Studium(commands.Cog):
                 stream.write(arg)
                 stream.write('\n')
             await ctx.send('Added!')
+        else:
+            await ctx.send('Failed to Add!')
 
     @commands.command(name='list', help='Lists all running schedules')
     async def list(self, ctx):
+        print("list")
+
         embedVar = discord.Embed(title="Schedules", color=0x00ff00)
         with open("schedule.yaml", 'r') as stream:
             for line in stream.readlines():
@@ -178,6 +184,7 @@ class Studium(commands.Cog):
 
     @commands.command(name='clear', help='Clears all running schedules')
     async def clear(self, ctx):
+        print("clear")
         with open("schedule.yaml", 'w+') as stream:
             pass
         schedule.clear()
@@ -185,7 +192,8 @@ class Studium(commands.Cog):
 
     @commands.command(name='rem', help='Removes a schedule')
     async def rem(self, ctx, *, arg):
-       
+        print("rem")
+
         if '-h' in arg or '-help' in arg:
             title =  "Help for: Rem"
             val = """
@@ -208,6 +216,7 @@ class Studium(commands.Cog):
             lines = stream.readlines()
 
         idx = int(arg) if arg.isdigit() else None
+        removed = False
         with open("schedule.yaml", 'w+') as stream:
             for i, line in enumerate(lines):
                 if idx != i and line.strip() != arg.strip():
@@ -215,6 +224,10 @@ class Studium(commands.Cog):
                         stream.write(line)
                 else:
                     await ctx.send("Removed from Schedule!")
+                    removed = True
+
+        if not removed:
+            await ctx.send("Nothing Removed from Schedule!")
                     
         # clear all schedules
         schedule.clear()
@@ -226,12 +239,15 @@ class Studium(commands.Cog):
 
     @commands.command(name='setup', help='Setup the Bot')
     async def setup(self, ctx):
+        print("setup")
         # TODO set channel
         # TODO set prefix
         pass
 
     @commands.command(name='display', help='Display information about Server')
     async def display(self, ctx):
+        print("display")
+
         embedVar = discord.Embed(title="Discord Data", color=0x00ff00)
         embedVar.add_field(
             name="Guild", 
@@ -256,6 +272,7 @@ async def loop():
         channel = bot.get_channel(772952750668382238)
 
         for str in messagesToSend:
+            print("sending", str)
             await channel.send(str)
 
         messagesToSend.clear()
@@ -266,7 +283,7 @@ async def loop():
         seconds = max((now - lastMin).seconds, 0)
         # sleep full minute - seconds passed in this minute
         # await asyncio.sleep(60 - seconds)
-        await asyncio.sleep(20)
+        await asyncio.sleep(1)
 
 
 bot.loop.create_task(loop())

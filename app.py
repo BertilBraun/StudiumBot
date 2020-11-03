@@ -49,11 +49,11 @@ async def addScheduleString(str, ctx = None) -> bool:
 
         return ret + [o]
     
-    async def showHelp(onError: bool):
+    async def showHelp(error):
         if ctx == None:
             return
 
-        title =  "Error in Command: Add" if (onError) else "Help for: Add"
+        title =  "Error in Command: Add " + error if (error != None) else "Help for: Add"
         val = """
             usage: .add [-h | -help] on ... at ... send ...
 
@@ -72,7 +72,7 @@ async def addScheduleString(str, ctx = None) -> bool:
     str = str.replace('on', '-on').replace('at', '-at').replace('send', '-send')
 
     if '-h' in str or '-help' in str:
-        await showHelp(False)
+        await showHelp(None)
         return False
         
     try:
@@ -112,10 +112,16 @@ async def addScheduleString(str, ctx = None) -> bool:
             elif args.on == 'every':
                 event = event.day
             else:
-                await showHelp(True)
+                await showHelp('Day not recognized!')
                 
         if args.at != None:
-            event = event.at(args.at)
+            date = datetime.datetime.strptime(args.at, '%H:%M')
+            time = date - datetime.timedelta(hours=1)
+            if time.hour > date.hour:
+                await showHelp('Hour must be greater than 1 (Sorry)')
+                return False
+
+            event = event.at(time.strftime('%H:%M'))
         
         def job(str):
             print("Event happended:", str)
@@ -126,7 +132,7 @@ async def addScheduleString(str, ctx = None) -> bool:
         return True
 
     except Exception as e:
-        await showHelp(True)
+        await showHelp('Exception occured (Sorry)')
         print(e)
         return False
 
@@ -245,20 +251,21 @@ async def loop():
     while True:
         # Channel bot-notifications
         # TODO Based on server ID -> also only send messages that are supposed to go to that server
+        schedule.run_pending()
+
         channel = bot.get_channel(772952750668382238)
 
         for str in messagesToSend:
             await channel.send(str)
 
         messagesToSend.clear()
-        schedule.run_pending()
+        
         # sleep until next minute starts
         now = datetime.datetime.now()
         lastMin = now.replace(second=5)
         seconds = max((now - lastMin).seconds, 0)
         # sleep full minute - seconds passed in this minute
         # await asyncio.sleep(60 - seconds)
-        print("update")
         await asyncio.sleep(20)
 
 

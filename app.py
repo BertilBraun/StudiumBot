@@ -212,8 +212,14 @@ class Studium(commands.Cog):
             if line.strip() != '':
                 await addScheduleString(line)
 
-    @commands.command(name='test')
-    async def test(self, ctx):
+    @commands.command(name='setup', help='Setup the Bot')
+    async def setup(self, ctx):
+        # TODO set channel
+        # TODO set prefix
+        pass
+
+    @commands.command(name='display', help='Display information about Server')
+    async def display(self, ctx):
         embedVar = discord.Embed(title="Discord Data", color=0x00ff00)
         embedVar.add_field(
             name="Guild", 

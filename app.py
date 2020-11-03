@@ -116,8 +116,12 @@ async def addScheduleString(str, ctx = None) -> bool:
                 
         if args.at != None:
             event = event.at(args.at)
+        
+        def job(str):
+            print("Event happended:", str)
+            messagesToSend.append(str)
 
-        event.do(lambda str: messagesToSend.append(str), args.send)
+        event.do(job, args.send)
 
         return True
 
@@ -254,6 +258,7 @@ async def loop():
         seconds = max((now - lastMin).seconds, 0)
         # sleep full minute - seconds passed in this minute
         # await asyncio.sleep(60 - seconds)
+        print("update")
         await asyncio.sleep(20)
 
 

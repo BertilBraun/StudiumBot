@@ -1,0 +1,2 @@
+on Mo send "Test"
+on Mo at 15:10 send "Test"

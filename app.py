@@ -13,7 +13,7 @@ print("Starting..")
 load_dotenv() 
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-bot = commands.Bot(command_prefix='.', description='A Studium Bot to manage Studing')
+bot = commands.Bot(command_prefix='.', description='A Studium Bot to manage Studying')
    
 # https://discordpy.readthedocs.io/en/latest/api.html#discord.TextChannel
 # https://discordpy.readthedocs.io/en/latest/api.html#discord.Guild
@@ -138,16 +138,21 @@ async def addScheduleString(str, ctx = None) -> bool:
         print(e)
         return False
 
+async def reload():
+    schedule.clear()
+
+    with open("schedule.yaml", 'r') as stream:
+        for line in stream.readlines():
+            if line.strip() != '':
+                await addScheduleString(line)
+
 @bot.event
 async def on_ready():
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="you.."))
     print('We have logged in as', bot.user)
     # Load from File
     # TODO based on server ID
-    with open("schedule.yaml", 'r') as stream:
-        line = stream.readline()
-        if line.strip() != '':
-            await addScheduleString(line)
+    await reload()
 
 class Studium(commands.Cog):
     """Category documentations"""
@@ -230,13 +235,31 @@ class Studium(commands.Cog):
         if not removed:
             await ctx.send("Nothing Removed from Schedule!")
                     
-        # clear all schedules
-        schedule.clear()
         # reload remaining schedules
+        await reload()
+        
+    @commands.command(name='reload', help='Reload all Schedules from File')
+    async def reload(self, ctx):
+        print("reload")
+        await reload()
+        await ctx.send("Reloaded Schedule!")
+         
+    @commands.command(name='dump', help='Dumps all Schedules to Chat')
+    async def dump(self, ctx):
+        print("dump")     
+
+        data = ''
         with open("schedule.yaml", 'r') as stream:
-            line = stream.readline()
-            if line.strip() != '':
-                await addScheduleString(line)
+            for line in stream.readlines():
+                if line.strip() != '':
+                    data += '.add ' + line
+
+        embedVar = discord.Embed(color=0x00ff00)   
+        embedVar.add_field(
+            name="Schedule Dump", 
+            value=data, 
+            inline=False)
+        await ctx.send(embed=embedVar)
 
     @commands.command(name='setup', help='Setup the Bot')
     async def setup(self, ctx):
@@ -245,6 +268,7 @@ class Studium(commands.Cog):
         # TODO set prefix
         pass
 
+class Util(commands.Cog):
     @commands.command(name='display', help='Display information about Server')
     async def display(self, ctx):
         print("display")
@@ -263,6 +287,13 @@ class Studium(commands.Cog):
             value=str(ctx.author) + ' ' + str(ctx.me), 
             inline=False)
         await ctx.send(embed=embedVar)
+        
+    @commands.command(name='clearchat', help='Clears Messages of current channel')
+    async def clearchat(self, ctx, number = None):
+        print("clearchat")
+
+        number = 1000 if number == None else int(number) + 1
+        await ctx.channel.purge(limit=number)
 
 async def loop():
     while True:
@@ -289,4 +320,5 @@ async def loop():
 
 bot.loop.create_task(loop())
 bot.add_cog(Studium())
+bot.add_cog(Util())
 bot.run(TOKEN)

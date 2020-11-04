@@ -1,5 +1,5 @@
 import os
-import yaml
+import re
 import asyncio
 import discord
 import schedule
@@ -28,9 +28,16 @@ async def showHelpWrapper(ctx, title, val):
         inline=False)
     await ctx.send(embed=embedVar)
 
+# TODO Add through File
 async def addScheduleString(str, ctx = None) -> bool:
   
     def split(str):
+        def replace(m):
+            if m.group().startswith('"'):
+                return m.group()
+            return m.group().replace('on', '-on').replace('at', '-at').replace('send', '-send')
+
+        str = re.sub(r'"[^"]*"|[^"]+', replace, str)
         ret = []
         o = ""
         doubleOpen = False
@@ -68,8 +75,6 @@ async def addScheduleString(str, ctx = None) -> bool:
             .add on Mo at 18:10 send "New Event upcoming! Join us in VC!"
             """
         await showHelpWrapper(ctx, title, val)
-
-    str = str.replace('on', '-on').replace('at', '-at').replace('send', '-send')
 
     if '-h' in str or '-help' in str:
         await showHelp(None)
@@ -163,19 +168,24 @@ class Studium(commands.Cog):
                 pass
 
     @commands.command(name='add', help='This Command adds a message to be displayed at a specific time!')
-    async def addToSchedule(self, ctx, *, arg):
+    async def addToSchedule(self, ctx, *, arg: str):
         print("add")
         # Add to Schedule
-        added = await addScheduleString(arg, ctx)
+        print(len(arg.splitlines(False)))
 
-        if added == True:
-            # Save to File
-            with open("schedule.yaml", 'a') as stream:
-                stream.write(arg)
-                stream.write('\n')
-            await ctx.send('Added!')
-        else:
-            await ctx.send('Failed to Add!')
+        for line in arg.splitlines(False):
+            line = line.strip('.add ')
+
+            added = await addScheduleString(line, ctx)
+
+            if added == True:
+                # Save to File
+                with open("schedule.yaml", 'a') as stream:
+                    stream.write(line)
+                    stream.write('\n')
+                await ctx.send('Added!')
+
+        await ctx.send('Done!')
 
     @commands.command(name='list', help='Lists all running schedules')
     async def list(self, ctx):

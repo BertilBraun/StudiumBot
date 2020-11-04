@@ -12,6 +12,7 @@ print("Starting..")
 
 load_dotenv() 
 TOKEN = os.getenv('DISCORD_TOKEN')
+SAVE_FILE = os.getenv('SAVE_FILE')
 
 bot = commands.Bot(command_prefix='.', description='A Studium Bot to manage Studying')
    
@@ -87,7 +88,7 @@ async def addScheduleString(str, ctx = None) -> bool:
         parser.add_argument('-send', dest='send', required=True)
         args = parser.parse_args(split(str))
 
-        with open("schedule.yaml", 'r') as stream:
+        with open(SAVE_FILE, 'r') as stream:
             for line in stream.readlines():
                 if (f'on {args.on}' in line and f'at {args.at}' in line) or \
                 (f'on {args.on}' in line and args.at == None) or \
@@ -146,7 +147,7 @@ async def addScheduleString(str, ctx = None) -> bool:
 async def reload():
     schedule.clear()
 
-    with open("schedule.yaml", 'r') as stream:
+    with open(SAVE_FILE, 'r') as stream:
         for line in stream.readlines():
             if line.strip() != '':
                 await addScheduleString(line)
@@ -163,8 +164,8 @@ class Studium(commands.Cog):
     """Category documentations"""
 
     def __init__(self):
-        if not os.path.exists("schedule.yaml"):
-            with open("schedule.yaml", 'w+') as stream:
+        if not os.path.exists(SAVE_FILE):
+            with open(SAVE_FILE, 'w+') as stream:
                 pass
 
     @commands.command(name='add', help='This Command adds a message to be displayed at a specific time!')
@@ -180,7 +181,7 @@ class Studium(commands.Cog):
 
             if added == True:
                 # Save to File
-                with open("schedule.yaml", 'a') as stream:
+                with open(SAVE_FILE, 'a') as stream:
                     stream.write(line)
                     stream.write('\n')
                 await ctx.send('Added!')
@@ -192,7 +193,7 @@ class Studium(commands.Cog):
         print("list")
 
         embedVar = discord.Embed(title="Schedules", color=0x00ff00)
-        with open("schedule.yaml", 'r') as stream:
+        with open(SAVE_FILE, 'r') as stream:
             for line in stream.readlines():
                 if line.strip() != '':
                     embedVar.add_field(name="Schedule:", value=line, inline=False)
@@ -201,7 +202,7 @@ class Studium(commands.Cog):
     @commands.command(name='clear', help='Clears all running schedules')
     async def clear(self, ctx):
         print("clear")
-        with open("schedule.yaml", 'w+') as stream:
+        with open(SAVE_FILE, 'w+') as stream:
             pass
         schedule.clear()
         await ctx.send("Cleared Schedule!")
@@ -228,12 +229,12 @@ class Studium(commands.Cog):
             await showHelpWrapper(ctx, title, val)
             return
         
-        with open("schedule.yaml", 'r') as stream:
+        with open(SAVE_FILE, 'r') as stream:
             lines = stream.readlines()
 
         idx = int(arg) if arg.isdigit() else None
         removed = False
-        with open("schedule.yaml", 'w+') as stream:
+        with open(SAVE_FILE, 'w+') as stream:
             for i, line in enumerate(lines):
                 if idx != i and line.strip() != arg.strip():
                     if line.strip() != '':
@@ -258,8 +259,8 @@ class Studium(commands.Cog):
     async def dump(self, ctx):
         print("dump")     
 
-        data = ''
-        with open("schedule.yaml", 'r') as stream:
+        data = ' '
+        with open(SAVE_FILE, 'r') as stream:
             for line in stream.readlines():
                 if line.strip() != '':
                     data += '.add ' + line

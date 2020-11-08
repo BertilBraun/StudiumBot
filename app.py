@@ -2,6 +2,7 @@ import os
 import re
 import asyncio
 import discord
+import requests
 import schedule
 import argparse
 import datetime
@@ -12,7 +13,8 @@ print("Starting..")
 
 load_dotenv() 
 TOKEN = os.getenv('DISCORD_TOKEN')
-SAVE_FILE = os.getenv('SAVE_FILE')
+
+URL = 'http://studium-bot.braun-oliver.de/studium-bot.php'
 
 bot = commands.Bot(command_prefix='.', description='A Studium Bot to manage Studying')
    
@@ -20,6 +22,10 @@ bot = commands.Bot(command_prefix='.', description='A Studium Bot to manage Stud
 # https://discordpy.readthedocs.io/en/latest/api.html#discord.Guild
 
 messagesToSend = []
+
+def getSchedules():
+    r = requests.get(URL)
+    return [line for line in r.text.split('\n') if line.strip() != '']
 
 async def showHelpWrapper(ctx, title, val):
     embedVar = discord.Embed(color=0x00ff00)
@@ -88,14 +94,13 @@ async def addScheduleString(str, ctx = None) -> bool:
         parser.add_argument('-send', dest='send', required=True)
         args = parser.parse_args(split(str))
 
-        with open(SAVE_FILE, 'r') as stream:
-            for line in stream.readlines():
-                if (f'on {args.on}' in line and f'at {args.at}' in line) or \
-                (f'on {args.on}' in line and args.at == None) or \
-                (args.on == None and f'at {args.at}' in line):
-                    if ctx != None:
-                        await ctx.send('Theres already something scheduled at that time, please select another Timepoint.')
-                    return False
+        for line in getSchedules():
+            if (f'on {args.on}' in line and f'at {args.at}' in line) or \
+            (f'on {args.on}' in line and args.at == None) or \
+            (args.on == None and f'at {args.at}' in line):
+                if ctx != None:
+                    await ctx.send('Theres already something scheduled at that time, please select another Timepoint.')
+                return False
 
         event = schedule.every()
 
@@ -147,10 +152,9 @@ async def addScheduleString(str, ctx = None) -> bool:
 async def reload():
     schedule.clear()
 
-    with open(SAVE_FILE, 'r') as stream:
-        for line in stream.readlines():
-            if line.strip() != '':
-                await addScheduleString(line)
+    for line in getSchedules():
+        if line.strip() != '':
+            await addScheduleString(line)
 
 @bot.event
 async def on_ready():
@@ -162,11 +166,6 @@ async def on_ready():
 
 class Studium(commands.Cog):
     """Category documentations"""
-
-    def __init__(self):
-        if not os.path.exists(SAVE_FILE):
-            with open(SAVE_FILE, 'w+') as stream:
-                pass
 
     @commands.command(name='add', help='This Command adds a message to be displayed at a specific time!')
     async def addToSchedule(self, ctx, *, arg: str):
@@ -181,9 +180,7 @@ class Studium(commands.Cog):
 
             if added == True:
                 # Save to File
-                with open(SAVE_FILE, 'a') as stream:
-                    stream.write(line)
-                    stream.write('\n')
+                requests.post(URL, data = {'schedule':line.strip() + '\n' })
                 await ctx.send('Added!')
 
         await ctx.send('Done!')
@@ -193,8 +190,6 @@ class Studium(commands.Cog):
         print("list")
 
         embedVar = discord.Embed(title="Schedules", color=0x00ff00)
-        with open(SAVE_FILE, 'r') as stream:
-            lines = [line for line in stream.readlines() if line.strip() != '']
 
         def search(line:str):
             d = { 
@@ -214,7 +209,8 @@ class Studium(commands.Cog):
             if 'at' in tokens:
                 key += ' ' + tokens[tokens.index('at') + 1].rjust(5, '0')
             return key
-
+        
+        lines = getSchedules()
         lines.sort(key=search)
 
         schedules = {}
@@ -237,8 +233,7 @@ class Studium(commands.Cog):
     @commands.command(name='clear', help='Clears all running schedules')
     async def clear(self, ctx):
         print("clear")
-        with open(SAVE_FILE, 'w+') as stream:
-            pass
+        requests.post(URL, data = {'clear':'true'})
         schedule.clear()
         await ctx.send("Cleared Schedule!")
 
@@ -264,19 +259,14 @@ class Studium(commands.Cog):
             await showHelpWrapper(ctx, title, val)
             return
         
-        with open(SAVE_FILE, 'r') as stream:
-            lines = stream.readlines()
-
         idx = int(arg) if arg.isdigit() else None
         removed = False
-        with open(SAVE_FILE, 'w+') as stream:
-            for i, line in enumerate(lines):
-                if idx != i and line.strip() != arg.strip():
-                    if line.strip() != '':
-                        stream.write(line)
-                else:
-                    await ctx.send("Removed from Schedule!")
-                    removed = True
+        for i, line in enumerate(getSchedules()):
+            if idx != i and line != arg.strip():
+                requests.post(URL, data = {'schedule':line})
+            else:
+                await ctx.send("Removed from Schedule!")
+                removed = True
 
         if not removed:
             await ctx.send("Nothing Removed from Schedule!")
@@ -294,11 +284,9 @@ class Studium(commands.Cog):
     async def dump(self, ctx):
         print("dump")     
 
-        data = ' '
-        with open(SAVE_FILE, 'r') as stream:
-            for line in stream.readlines():
-                if line.strip() != '':
-                    data += '.add ' + line
+        data = ''
+        for line in getSchedules():
+            data += '.add ' + line + '\n'
 
         embedVar = discord.Embed(color=0x00ff00)   
         embedVar.add_field(

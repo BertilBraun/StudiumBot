@@ -221,10 +221,12 @@ class Studium(commands.Cog):
                 schedules['On Time'].append(line)
             else:
                 tokens = line.split()
-                key = 'On ' + tokens[tokens.index('on') + 1]
+                idx = tokens.index('on')
+                key = 'On ' + tokens[idx + 1]
+                tokens = tokens[:idx] + tokens[idx + 2:]
                 if not key in schedules:
                     schedules[key] = []
-                schedules[key].append(line)
+                schedules[key].append(' '.join(tokens))
                 
         for k, v in schedules.items():
             embedVar.add_field(name=k, value='\n'.join(v), inline=False)

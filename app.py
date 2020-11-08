@@ -194,9 +194,44 @@ class Studium(commands.Cog):
 
         embedVar = discord.Embed(title="Schedules", color=0x00ff00)
         with open(SAVE_FILE, 'r') as stream:
-            for line in stream.readlines():
-                if line.strip() != '':
-                    embedVar.add_field(name="Schedule:", value=line, inline=False)
+            lines = [line for line in stream.readlines() if line.strip() != '']
+
+        def search(line:str):
+            d = { 
+                'Mo': 1, 
+                'Tu': 2, 'Di': 2,
+                'We': 3, 'Mi': 3,
+                'Th': 4, 'Do': 4,
+                'Fr': 5,
+                'Sa': 6,
+                'Su': 7, 'So': 7,
+                'every': 8,
+                }
+            tokens = line.split()
+            key = ''
+            if 'on' in tokens:
+                key += str(d[tokens[tokens.index('on') + 1]])
+            if 'at' in tokens:
+                key += ' ' + tokens[tokens.index('at') + 1].rjust(5, '0')
+            return key
+
+        lines.sort(key=search)
+
+        schedules = {}
+        for line in lines:
+            if not 'on' in line:
+                if not 'On Time' in schedules:
+                    schedules['On Time'] = []
+                schedules['On Time'].append(line)
+            else:
+                tokens = line.split()
+                key = 'On ' + tokens[tokens.index('on') + 1]
+                if not key in schedules:
+                    schedules[key] = []
+                schedules[key].append(line)
+                
+        for k, v in schedules.items():
+            embedVar.add_field(name=k, value='\n'.join(v), inline=False)
         await ctx.send(embed=embedVar)
 
     @commands.command(name='clear', help='Clears all running schedules')

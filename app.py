@@ -142,8 +142,7 @@ async def addScheduleString(str, ctx = None, checkIfExists = False) -> bool:
             messagesToSend.append(str)
 
         event.do(job, args.send)
-        print("added:")
-        print(args)
+        print("added:", args)
 
         return True
 
@@ -172,10 +171,9 @@ class Studium(commands.Cog):
 
     @commands.command(name='add', help='This Command adds a message to be displayed at a specific time!')
     async def addToSchedule(self, ctx, *, arg: str):
-        print("add")
+        print("add", len(arg.splitlines()))
+        
         # Add to Schedule
-        print(len(arg.splitlines(False)))
-
         for line in arg.splitlines(False):
             line = line.strip('.add ')
 

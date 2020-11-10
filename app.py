@@ -261,11 +261,14 @@ class Studium(commands.Cog):
             await showHelpWrapper(ctx, title, val)
             return
         
+        lines = getSchedules()
+        requests.post(URL, data = {'clear':'true'})
+
         idx = int(arg) if arg.isdigit() else None
         removed = False
-        for i, line in enumerate(getSchedules()):
+        for i, line in enumerate(lines):
             if idx != i and line != arg.strip():
-                requests.post(URL, data = {'schedule':line})
+                requests.post(URL, data = {'schedule':line + '\n'})
             else:
                 await ctx.send("Removed from Schedule!")
                 removed = True

@@ -35,8 +35,7 @@ async def showHelpWrapper(ctx, title, val):
         inline=False)
     await ctx.send(embed=embedVar)
 
-# TODO Add through File
-async def addScheduleString(str, ctx = None) -> bool:
+async def addScheduleString(str, ctx = None, checkIfExists = False) -> bool:
   
     def split(str):
         def replace(m):
@@ -94,13 +93,15 @@ async def addScheduleString(str, ctx = None) -> bool:
         parser.add_argument('-send', dest='send', required=True)
         args = parser.parse_args(split(str))
 
-        for line in getSchedules():
-            if (f'on {args.on}' in line and f'at {args.at}' in line) or \
-            (f'on {args.on}' in line and args.at == None) or \
-            (args.on == None and f'at {args.at}' in line):
-                if ctx != None:
-                    await ctx.send('Theres already something scheduled at that time, please select another Timepoint.')
-                return False
+        if checkIfExists:
+            for line in getSchedules():
+                if (f'on {args.on}' in line and f'at {args.at}' in line) or \
+                (f'on {args.on}' in line and args.at == None) or \
+                (args.on == None and f'at {args.at}' in line):
+                    if ctx != None:
+                        await ctx.send('Theres already something scheduled at that time, please select another Timepoint.')
+                    print('Theres already something scheduled at that time, please select another Timepoint.')
+                    return False
 
         event = schedule.every()
 
@@ -123,6 +124,7 @@ async def addScheduleString(str, ctx = None) -> bool:
             elif args.on == 'every':
                 event = event.day
             else:
+                print('Day not recognized!')
                 await showHelp('Day not recognized!')
                 
         if args.at != None:
@@ -130,6 +132,7 @@ async def addScheduleString(str, ctx = None) -> bool:
             time = date - datetime.timedelta(hours=1)
             if time.hour > date.hour:
                 await showHelp('Hour must be greater than 1 (Sorry)')
+                print('Hour must be greater than 1 (Sorry)')
                 return False
 
             event = event.at(time.strftime('%H:%M'))
@@ -176,7 +179,7 @@ class Studium(commands.Cog):
         for line in arg.splitlines(False):
             line = line.strip('.add ')
 
-            added = await addScheduleString(line, ctx)
+            added = await addScheduleString(line, ctx, True)
 
             if added == True:
                 # Save to File

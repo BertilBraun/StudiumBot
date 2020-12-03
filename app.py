@@ -166,7 +166,7 @@ async def on_ready():
     # TODO based on server ID
     await reload()
 
-class Studium(commands.Cog):
+class Shedule(commands.Cog):
     """Category documentations"""
 
     @commands.command(name='add', help='This Command adds a message to be displayed at a specific time!')
@@ -334,6 +334,13 @@ class Util(commands.Cog):
 
         number = 1000 if number == None else int(number) + 1
         await ctx.channel.purge(limit=number)
+        
+    @commands.command(name='nerf', help='Pings provided User in each channel')
+    async def clearchat(self, ctx, user):
+        print("nerf")
+
+        for channel in ctx.guild.text_channels:
+            await channel.send(user)
 
 async def loop():
     while True:

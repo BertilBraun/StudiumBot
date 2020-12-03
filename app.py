@@ -335,12 +335,12 @@ class Util(commands.Cog):
         number = 1000 if number == None else int(number) + 1
         await ctx.channel.purge(limit=number)
         
-    @commands.command(name='nerf', help='Pings provided User in each channel')
-    async def clearchat(self, ctx, user):
-        print("nerf")
+    @commands.command(name='hol', help='Pings provided User in each channel')
+    async def hol(self, ctx, user):
+        print("hol")
 
         for channel in ctx.guild.text_channels:
-            await channel.send(user)
+            await channel.send("Komm mal her " + user + "!")
 
 async def loop():
     while True:

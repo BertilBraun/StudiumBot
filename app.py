@@ -376,7 +376,7 @@ class Util(commands.Cog):
         bytes = await generate_file(200, calculation)
         filename = '{}.png'.format(calculation)
         await ctx.message.delete()
-        await ctx.message.channel.send(f'***{ctx.message.author.name}*** {calculation}', file=discord.File(bytes, filename=filename))
+        await ctx.message.channel.send(f'***{ctx.message.author.name}***\n{calculation}', file=discord.File(bytes, filename=filename))
          
 async def loop():
     while True:

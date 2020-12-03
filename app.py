@@ -376,7 +376,7 @@ class Util(commands.Cog):
         # await bot.send_typing(ctx.message.channel)
 
         bytes = await generate_file(200, calculation)
-        filename = '{}.png'.format(random.randint(1, 1000))
+        filename = '{}.png'.format(calculation)
         await ctx.message.delete()
         await ctx.message.channel.send('', file=discord.File(bytes, filename=filename))
 

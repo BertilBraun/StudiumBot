@@ -376,11 +376,11 @@ class Util(commands.Cog):
         # await bot.send_typing(ctx.message.channel)
 
         bytes = await generate_file(200, calculation)
-        filename = '{}.png'.format(random.randint(1, 1000))
-        f = open(filename, 'wb')
-        f.write(bytes)
-        f.close()
-        await ctx.message.channel.send('***Calculation***', file=discord.File(filename))
+        #filename = '{}.png'.format(random.randint(1, 1000))
+        #f = open(filename, 'wb')
+        #f.write(bytes)
+        #f.close()
+        await ctx.message.channel.send('***Calculation***', file=discord.File(bytes))
 
 async def loop():
     while True:

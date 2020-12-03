@@ -1,11 +1,17 @@
 import os
 import re
+import io
+import random
 import asyncio
 import discord
 import requests
 import schedule
 import argparse
 import datetime
+import urllib.request
+import urllib.parse
+
+from PIL import Image
 from dotenv import load_dotenv
 from discord.ext import commands
 
@@ -157,6 +163,27 @@ async def reload():
     for line in getSchedules():
         if line.strip() != '':
             await addScheduleString(line)
+
+# Using 3rdparty site to render TeX is not
+# the best solution, however CodeCogs site
+# is pretty stable and this method does not
+# require installing LaTeX on local machine.
+async def generate_file(dpi, tex):
+    MARGIN = 20
+    URL = 'https://latex.codecogs.com/gif.latex?{0}'
+    TEMPLATE = '\\dpi{{{}}} \\bg_white {}'
+    query = TEMPLATE.format(dpi, tex)
+    url = URL.format(urllib.parse.quote(query))
+    bytes = urllib.request.urlopen(url).read()
+    img = Image.open(io.BytesIO(bytes))
+    old_size = img.size
+    new_size = (old_size[0] + MARGIN, old_size[1] + MARGIN)
+    new_img = Image.new("RGB", new_size, (255, 255, 255))
+    new_img.paste(img, (int(MARGIN / 2), int(MARGIN / 2)))
+    img_bytes = io.BytesIO()
+    new_img.save(img_bytes, 'PNG')
+    img_bytes.seek(0)
+    return img_bytes
 
 @bot.event
 async def on_ready():
@@ -341,6 +368,16 @@ class Util(commands.Cog):
 
         for channel in ctx.guild.text_channels:
             await channel.send("Komm mal her " + user + "!")
+            
+    @commands.command(name='latex', help='Renderes the entered Calculation based on Latex format')
+    async def latex(self, ctx, *, calculation):
+        print("latex", calculation)
+        
+        await client.send_typing(ctx.channel)
+
+        bytes = await generate_file(200, calculation)
+        filename = '{}.png'.format(random.randint(1, 1000))
+        await bot.send_file(message.channel, bytes, filename=filename)
 
 async def loop():
     while True:

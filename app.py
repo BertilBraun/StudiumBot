@@ -166,7 +166,7 @@ async def on_ready():
     # TODO based on server ID
     await reload()
 
-class Shedule(commands.Cog):
+class Schedule(commands.Cog):
     """Category documentations"""
 
     @commands.command(name='add', help='This Command adds a message to be displayed at a specific time!')
@@ -366,6 +366,6 @@ async def loop():
 
 
 bot.loop.create_task(loop())
-bot.add_cog(Studium())
+bot.add_cog(Schedule())
 bot.add_cog(Util())
 bot.run(TOKEN)

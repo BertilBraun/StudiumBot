@@ -373,11 +373,11 @@ class Util(commands.Cog):
     async def latex(self, ctx, *, calculation):
         print("latex", calculation)
         
-        await bot.send_typing(ctx.channel)
+        # await bot.send_typing(ctx.message.channel)
 
         bytes = await generate_file(200, calculation)
         filename = '{}.png'.format(random.randint(1, 1000))
-        await bot.send_file(ctx.channel, bytes, filename=filename)
+        await bot.send_file(ctx.message.channel, bytes, filename=filename)
 
 async def loop():
     while True:

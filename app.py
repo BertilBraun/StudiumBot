@@ -373,11 +373,17 @@ class Util(commands.Cog):
     async def latex(self, ctx, *, calculation):
         print("latex", calculation)
         
-        # await bot.send_typing(ctx.message.channel)
-
         bytes = await generate_file(200, calculation)
         filename = '{}.png'.format(calculation)
         await ctx.message.delete()
+        await ctx.message.channel.send('', file=discord.File(bytes, filename=filename))
+         
+    @commands.command(name='latexform', help='Renderes the entered Calculation based on Latex format')
+    async def latexform(self, ctx, *, calculation):
+        print("latexform", calculation)
+        
+        bytes = await generate_file(200, calculation)
+        filename = '{}.png'.format(calculation)
         await ctx.message.channel.send('', file=discord.File(bytes, filename=filename))
 
 async def loop():

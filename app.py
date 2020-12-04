@@ -171,7 +171,7 @@ async def reload():
 async def generate_file(dpi, tex):
     MARGIN = 20
     URL = 'https://latex.codecogs.com/gif.latex?{0}'
-    TEMPLATE = '\\dpi{{{}}} \\bg_white {}'
+    TEMPLATE = '\\dpi{{{}}} \\bg_dark {}'
     query = TEMPLATE.format(dpi, tex)
     url = URL.format(urllib.parse.quote(query))
     bytes = urllib.request.urlopen(url).read()
@@ -372,11 +372,10 @@ class Util(commands.Cog):
     @commands.command(name='latex', help='Renderes the entered Calculation based on Latex format')
     async def latex(self, ctx, *, calculation):
         print("latex", calculation)
-        
+        await ctx.message.delete()
         bytes = await generate_file(200, calculation)
         filename = '{}.png'.format(calculation)
-        await ctx.message.delete()
-        await ctx.message.channel.send(f'***{ctx.message.author.name}***\n{calculation}', file=discord.File(bytes, filename=filename))
+        await ctx.message.channel.send(f'***{ctx.message.author.name}***\n.latex {calculation}', file=discord.File(bytes, filename=filename))
          
 async def loop():
     while True:

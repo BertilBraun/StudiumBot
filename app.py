@@ -170,9 +170,8 @@ async def reload():
 # require installing LaTeX on local machine.
 async def generate_file(dpi, tex):
     MARGIN = 20
-    URL = 'https://latex.codecogs.com/gif.latex?{0}'
-    TEMPLATE = '\\dpi{{{}}} \\bg_white {}'
-    query = TEMPLATE.format(dpi, tex)
+    URL = 'https://chart.apis.google.com/chart?cht=tx&chco=white&chs=50&chf=bg,s,00000000&chco=FFFFFFFF&chl={0}'
+    query = tex.replace('+', '%2b').replace('%5Cland', '%5Cwedge').replace('%5Clor', '%5Cvee').replace('%5Clnot', '%5Cneg')
     url = URL.format(urllib.parse.quote(query))
     bytes = urllib.request.urlopen(url).read()
     img = Image.open(io.BytesIO(bytes))

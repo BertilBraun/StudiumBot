@@ -177,7 +177,7 @@ async def generate_file(dpi, tex):
     img = Image.open(io.BytesIO(bytes))
     old_size = img.size
     new_size = (old_size[0] + MARGIN, old_size[1] + MARGIN)
-    new_img = Image.new("RGB", new_size, img[0,0])
+    new_img = Image.new("RGB", new_size, img.load()[0,0])
     new_img.paste(img, (int(MARGIN / 2), int(MARGIN / 2)))
     img_bytes = io.BytesIO()
     new_img.save(img_bytes, 'PNG')

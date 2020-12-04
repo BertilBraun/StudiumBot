@@ -171,7 +171,7 @@ async def reload():
 async def generate_file(dpi, tex):
     MARGIN = 20
     URL = 'https://latex.codecogs.com/gif.latex?{0}'
-    TEMPLATE = '\\dpi{{{}}} \\bg_dark {}'
+    TEMPLATE = '\\dpi{{{}}} \\bg_grey {}'
     query = TEMPLATE.format(dpi, tex)
     url = URL.format(urllib.parse.quote(query))
     bytes = urllib.request.urlopen(url).read()

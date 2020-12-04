@@ -174,6 +174,7 @@ async def generate_file(dpi, tex):
     query = tex.replace('+', '%2b').replace('%5Cland', '%5Cwedge').replace('%5Clor', '%5Cvee').replace('%5Clnot', '%5Cneg')
     url = URL.format(urllib.parse.quote(query))
     bytes = urllib.request.urlopen(url).read()
+    return io.BytesIO(bytes)
     img = Image.open(io.BytesIO(bytes))
     old_size = img.size
     new_size = (old_size[0] + MARGIN, old_size[1] + MARGIN)

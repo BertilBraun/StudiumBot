@@ -168,22 +168,12 @@ async def reload():
 # the best solution, however CodeCogs site
 # is pretty stable and this method does not
 # require installing LaTeX on local machine.
-async def generate_file(dpi, tex):
-    MARGIN = 20
+async def load_latex_bytes(calculation) -> io.BytesIO:
     URL = 'https://chart.apis.google.com/chart?cht=tx&chco=white&chs=50&chf=bg,s,00000000&chco=FFFFFFFF&chl={0}'
-    query = tex.replace('+', '%2b').replace('%5Cland', '%5Cwedge').replace('%5Clor', '%5Cvee').replace('%5Clnot', '%5Cneg')
+    query = calculation.replace('+', '%2b').replace('%5Cland', '%5Cwedge').replace('%5Clor', '%5Cvee').replace('%5Clnot', '%5Cneg')
     url = URL.format(urllib.parse.quote(query))
     bytes = urllib.request.urlopen(url).read()
     return io.BytesIO(bytes)
-    img = Image.open(io.BytesIO(bytes))
-    old_size = img.size
-    new_size = (old_size[0] + MARGIN, old_size[1] + MARGIN)
-    new_img = Image.new("RGB", new_size, img.load()[0,0])
-    new_img.paste(img, (int(MARGIN / 2), int(MARGIN / 2)))
-    img_bytes = io.BytesIO()
-    new_img.save(img_bytes, 'PNG')
-    img_bytes.seek(0)
-    return img_bytes
 
 @bot.event
 async def on_ready():
@@ -373,9 +363,13 @@ class Util(commands.Cog):
     async def latex(self, ctx, *, calculation):
         print("latex", calculation)
         await ctx.message.delete()
-        bytes = await generate_file(200, calculation)
-        filename = '{}.png'.format(calculation)
-        await ctx.message.channel.send(f'***{ctx.message.author.name}***\n.latex {calculation}', file=discord.File(bytes, filename=filename))
+        try:
+            bytes = await load_latex_bytes(calculation)
+            filename = '{}.png'.format(calculation)
+            await ctx.message.channel.send(f'***{ctx.message.author.name}***\n.latex {calculation}', file=discord.File(bytes, filename=filename))
+        except:
+            await ctx.send('Failed to Render calculation: ' + calculation)
+
          
 async def loop():
     while True:

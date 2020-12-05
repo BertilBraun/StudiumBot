@@ -170,7 +170,7 @@ async def reload():
 # require installing LaTeX on local machine.
 async def load_latex_bytes(calculation) -> io.BytesIO:
     URL = 'https://chart.apis.google.com/chart?cht=tx&chco=white&chs=50&chf=bg,s,00000000&chco=FFFFFFFF&chl={0}'
-    query = calculation.replace('+', '%2b').replace('%5Cland', '%5Cwedge').replace('%5Clor', '%5Cvee').replace('%5Clnot', '%5Cneg')
+    query = calculation.replace('%5Cland', '%5Cwedge').replace('%5Clor', '%5Cvee').replace('%5Clnot', '%5Cneg')
     url = URL.format(urllib.parse.quote(query))
     bytes = urllib.request.urlopen(url).read()
     return io.BytesIO(bytes)
